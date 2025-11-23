@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getUsers, deleteUser, getUserByUUID } from "../../api/userService";
+import {
+  getUsers,
+  deleteUser,
+  getUserByUUID,
+  getUserTodos,
+} from "../../api/userService";
+
 import UserForm from "./UserForm";
 
 const UserList = () => {
@@ -9,10 +15,15 @@ const UserList = () => {
   const [selectedUUID, setSelectedUUID] = useState(null);
   const [viewUser, setViewUser] = useState(null);
 
+  // TODOS POPUP STATE
+  const [todosPopup, setTodosPopup] = useState(false);
+  const [todos, setTodos] = useState([]);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
 
+  // Load all users
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -26,28 +37,34 @@ const UserList = () => {
     }
   };
 
-  // VIEW USER
+  // VIEW USER POPUP
   const handleView = async (uuid) => {
     try {
       const res = await getUserByUUID(uuid);
       setViewUser(res.data);
     } catch (error) {
-      console.error("Error fetching user details:", error);
+      console.error("Error fetching user:", error);
     }
   };
 
-  // SHOW TODOS
-  const handleShowTodos = (uuid) => {
-    alert("Show all todos for user: " + uuid);
+  // SHOW ALL USER TODOS POPUP
+  const handleShowTodos = async (uuid) => {
+    try {
+      const res = await getUserTodos(uuid);
+      setTodos(res.data);
+      setTodosPopup(true);
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+    }
   };
 
-  // ADD FORM
+  // ADD USER
   const openAddForm = () => {
     setSelectedUUID(null);
     setShowForm(true);
   };
 
-  // EDIT FORM
+  // EDIT USER
   const openEditForm = (uuid) => {
     setSelectedUUID(uuid);
     setShowForm(true);
@@ -59,7 +76,7 @@ const UserList = () => {
 
     try {
       await deleteUser(uuid);
-      fetchUsers(); // refresh after delete
+      fetchUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
     }
@@ -75,7 +92,7 @@ const UserList = () => {
     setCurrentPage(1);
   }, [search]);
 
-  // PAGINATION
+  // PAGINATION VALUES
   const indexOfLast = currentPage * usersPerPage;
   const indexOfFirst = indexOfLast - usersPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirst, indexOfLast);
@@ -106,7 +123,7 @@ const UserList = () => {
         />
       )}
 
-      {/* VIEW POPUP */}
+      {/* VIEW USER POPUP */}
       {viewUser && (
         <div
           style={{
@@ -132,12 +149,67 @@ const UserList = () => {
         </div>
       )}
 
-      {/* TABLE */}
-      <table
-        border="1"
-        cellPadding="10"
-        style={{ width: "100%", marginTop: "20px" }}
-      >
+      {/* TODOS POPUP */}
+      {todosPopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: "10%",
+            left: "15%",
+            width: "70%",
+            background: "#fff",
+            padding: "20px",
+            borderRadius: "10px",
+            boxShadow: "0 0 12px #444",
+            zIndex: 999,
+            maxHeight: "80vh",
+            overflowY: "scroll",
+          }}
+        >
+          <h3>User Todo List</h3>
+
+          <table width="100%" border="1" cellPadding="10" style={{ marginTop: "10px" }}>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Scheduled</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {todos.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: "center" }}>
+                    No todos found for this user.
+                  </td>
+                </tr>
+              ) : (
+                todos.map((todo) => (
+                  <tr key={todo.uuid}>
+                    <td>{todo.title}</td>
+                    <td>{todo.priority}</td>
+                    <td>{todo.status}</td>
+                    <td>{todo.description}</td>
+                    <td>{todo.scheduled_date}</td>
+                    <td>{todo.created_at}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          <button style={{ marginTop: "20px" }} onClick={() => setTodosPopup(false)}>
+            Close
+          </button>
+        </div>
+      )}
+
+      {/* USER LIST TABLE */}
+      <table border="1" cellPadding="10" style={{ width: "100%", marginTop: "20px" }}>
         <thead>
           <tr>
             <th>UUID</th>
