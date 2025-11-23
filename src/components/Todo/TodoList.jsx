@@ -123,6 +123,7 @@ const TodoList = () => {
           <p><strong>Description:</strong> {viewTodo.description}</p>
           <p><strong>Priority:</strong> {viewTodo.priority}</p>
           <p><strong>Status:</strong> {viewTodo.status}</p>
+          <p><strong>User Name:</strong> {viewTodo.user.username}</p>
           <p><strong>Scheduled:</strong> {viewTodo.scheduled_date}</p>
           <p><strong>Created:</strong> {viewTodo.created_at}</p>
           <p><strong>Updated:</strong> {viewTodo.updated_at}</p>
@@ -143,6 +144,7 @@ const TodoList = () => {
             <th>Title</th>
             <th>Priority</th>
             <th>Status</th>
+            <th>User Name</th>
             <th>Description</th>
             <th>Scheduled Date</th>
             <th>Created</th>
@@ -158,6 +160,7 @@ const TodoList = () => {
               <td>{todo.title}</td>
               <td>{todo.priority}</td>
               <td>{todo.status}</td>
+              <td>{todo.user.username}</td>
               <td>{todo.description}</td>
               <td>{todo.scheduled_date}</td>
               <td>{todo.created_at}</td>
